@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Eye Gaze Visualization</title>
+    <script src="https://cdn.socket.io/3.0.4/socket.io.js"></script>
+    <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+    <style>
+    body {
+    font-family: 'Arial', sans-serif;
+    text-align: center;
+    background-color: #f4f4f4;
+    margin: 0;
+    padding: 0;
+     }
+
+    header {
+        background-color: #333;
+        padding: 15px;
+        color: white;
+        font-size: 24px;
+    }
+
+    #imageContainer {
+        display: flex;
+        justify-content: space-around;
+        margin: 20px;
+        flex-wrap: wrap;
+    }
+
+    img {
+        width: 350px;
+        height: 350px;
+        margin: 10px;
+        cursor: pointer;
+        border-radius: 10px;
+        transition: transform 0.3s ease-in-out;
+    }
+
+    img:hover {
+        transform: scale(1.1);
+    }
+
+    button {
+        padding: 10px;
+        font-size: 16px;
+        margin: 10px;
+        cursor: pointer;
+        border: none;
+        border-radius: 10px;
+        outline: none;
+    }
+
+    #startButton {
+        background-color: dodgerblue;
+        color: white;
+    }
+
+    #resetButton {
+        background-color: indianred;
+        color: white;
+    }
+
+        #header {
+            background-color: green;
+            color: green;
+            height: 50px;
+        }
+
+        .squares-container {
+            display: flex;
+            justify-content: space-evenly;
+            align-items: center;
+            height: 100vh;
+        }
+
+        /* Style for the blue squares */
+        .blueSquare {
+            width: 400px;
+            height: 400px;
+            background-color: blue;
+        }
+
+        /* Additional styling for the green square */
+        .blueSquare.green {
+            background-color: green;
+        }
+    </style>
+</head>
+
+<header>
+    AMUT prototype <br>
+    <input type="text" id="prefixInput" placeholder="Porsche poster">
+    <button onclick="setPrefix()">Set</button>
+    <button id="startButton" onclick="toggleDisplay()">Start</button>
+    <button id="resetButton" onclick="reset()" disabled>Reset</button>
+    <button onclick="startEyeTracking()">Start Eye Tracking</button>
+</header>
+
+
+
+<body>
+
+    <img src="{{ url_for('static/media', filename='Abandoned carnival ride_00001_.png') }}">
+
+    <div id="gazeCircle"
+        style="position: absolute; width: 20px; height: 20px; border-radius: 50%; background-color: red;"></div>
+
+    <div id="imageContainer"></div>
+
+    <div id="newestImageContainer">
+        <h2>New Iteration by AMUT AI</h2>
+        <img id="reloadImage" src="ComfyUI_windows_portable\ComfyUI\output\amut_00001_.png">
+    </div>
+
+    <!-- Blue Squares -->
+    <div class="squares-container">
+        <div class="blueSquare" id="square1"></div>
+        <div class="blueSquare" id="square2"></div>
+        <div class="blueSquare" id="square3"></div>
+        <div class="blueSquare" id="square4"></div>
+    </div>
+
+    <script>
+        let index = 0;  // Initialize the index variable
+        let prefix = "Porsche poster"; // Default prefix
+        var socket;
+        var eyeTrackingStarted = false;
+        var generalTimer = 10;
+        var isGreenSquareSet = false;
+        var squareTimers = {
+            'square1': { current: 0, total: 0 },
+            'square2': { current: 0, total: 0 },
+            'square3': { current: 0, total: 0 },
+            'square4': { current: 0, total: 0 }
+        };
+
+        const allImages = [
+            { id: 1, url: 'media/Enchanted forest at dusk_00001_.png', text: 'Enchanted forest at dusk' },
+            { id: 2, url: 'media/Galactic cityscape skyline_00001_.png', text: 'Galactic cityscape skyline' },
+            { id: 3, url: 'media/Serene mountain lake_00001_.png', text: 'Serene mountain lake' },
+            { id: 4, url: 'media/Abandoned carnival ride_00001_.png', text: 'Abandoned carnival ride' },
+            { id: 5, url: 'media/Whimsical underwater world_00001_.png', text: 'Whimsical underwater world' },
+            { id: 6, url: 'media/Celestial dance of colors_00001_.png', text: 'Celestial dance of colors' },
+            { id: 7, url: 'media/Desert oasis mirage_00001_.png', text: 'Desert oasis mirage' },
+            { id: 8, url: 'media/Urban jungle at sunrise_00001_.png', text: 'Urban jungle at sunrise' },
+            { id: 9, url: 'media/Steampunk robot invasion_00001_.png', text: 'Steampunk robot invasion' },
+            { id: 10, url: 'media/Mystical moonlit meadow_00001_.png', text: 'Mystical moonlit meadow' },
+            { id: 11, url: 'media/Cyberpunk street market_00001_.png', text: 'Cyberpunk street market' },
+            { id: 12, url: 'media/Floating island paradise_00001_.png', text: 'Floating island paradise' },
+            { id: 13, url: 'media/Ancient ruins in space_00001_.png', text: 'Ancient ruins in space' },
+            { id: 14, url: 'media/Surreal floating architecture_00001_.png', text: 'Surreal floating architecture' },
+            { id: 15, url: 'media/Forgotten spaceship graveyard_00001_.png', text: 'Forgotten spaceship graveyard' },
+            { id: 16, url: 'media/Rainbow waterfall cascade_00001_.png', text: 'Rainbow waterfall cascade' },
+            { id: 17, url: 'media/Haunted Victorian mansion_00001_.png', text: 'Haunted Victorian mansion' },
+            { id: 18, url: 'media/Bioluminescent cave exploration_00001_.png', text: 'Bioluminescent cave exploration' }
+        ];
+
+        function reloadImage() {
+        var imageElement = document.getElementById('reloadImage');
+        imageElement.src = "ComfyUI_windows_portable/ComfyUI/output/amut_00001_.png?" + new Date().getTime();
+
+        // Call the function again after 1000 milliseconds (1 second)
+        setTimeout(reloadImage, 1000);
+    }
+
+    // Start the initial call to the function
+    reloadImage();
+
+    let intervalId;
+
+    function shuffleArray(array) {
+        for (let i = array.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [array[i], array[j]] = [array[j], array[i]];
+        }
+    }
+
+    function getRandomImages(allImages, numImages) {
+        const shuffledImages = [...allImages];
+        shuffleArray(shuffledImages);
+        return shuffledImages.slice(0, numImages);
+    }
+
+    function displayTextAndRunPython(text) {
+        // Send the selected text to the server
+        fetch('http://127.0.0.1:5000/add_prompt', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ prompt: text }),
+        })
+        .then(response => response.json())
+        .then(data => {
+            console.log('Prompt added:', data);
+            // Run the Python script immediately
+            fetch('http://127.0.0.1:5000/run_script');
+        })
+        .catch(error => {
+            console.error('Error:', error);
+        });
+    }
+
+    function setPrefix() {
+        const prefixInput = document.getElementById('prefixInput');
+        prefix = prefixInput.value || "Porsche poster,"; // Use the entered value or default if empty
+    }
+
+    function displayImages() {
+        const container = document.getElementById('imageContainer');
+        container.innerHTML = '';
+
+        const selectedImages = getRandomImages(allImages, 4);
+
+        selectedImages.forEach(image => {
+            const imgElement = document.createElement('img');
+            imgElement.src = image.url;
+            imgElement.alt = `Image ${image.id}`;
+            imgElement.title = image.text;
+            imgElement.addEventListener('click', () => {
+                deleteFiles();
+                const fullPrompt = prefix + ', ' + image.text;
+                displayTextAndRunPython(fullPrompt);
+
+                // Display the newest image after 2 seconds
+                setTimeout(() => {
+                    displayNewestImage();
+                }, 2000);
+            });
+            container.appendChild(imgElement);
+        });
+    }
+
+    function toggleDisplay() {
+        start();
+        stop();
+    }
+
+    function start() {
+        deleteFiles();
+        displayImages();
+        intervalId = setInterval(displayImages, 5000); // Change the interval as needed (currently set to 5 seconds)
+        document.getElementById('startButton').innerText = 'Stop';
+        document.getElementById('resetButton').disabled = false;
+    }
+
+    function stop() {
+
+        clearInterval(intervalId);
+        intervalId = null;
+        document.getElementById('startButton').innerText = 'Start';
+        reloadImage();
+    }
+
+    function reset() {
+    // Delete files before resetting
+    deleteFiles();
+
+    stop();
+    document.getElementById('imageContainer').innerHTML = '';
+    document.getElementById('resetButton').disabled = true;
+    reloadImage();
+    }
+
+    function deleteFiles() {
+    // Send a request to the server to delete files
+    fetch('http://127.0.0.1:5000/delete_files', {
+        method: 'POST',
+    })
+    .then(response => response.json())
+    .then(data => {
+        console.log('Files deleted:', data);
+        // Reset the index and display the newest image
+        index = 0;
+        displayNewestImage();
+    })
+    .catch(error => {
+        console.error('Error:', error);
+    });
+}
+
+    function displayNewestImage() {
+        // Construct the URL for the newest image
+        const newestImageURL = `ComfyUI_windows_portable/ComfyUI/output/amut_00001_.png`;  // Assuming PNG format
+        const newestImage = document.getElementById('newestImage');
+        newestImage.src = newestImageURL;
+    }
+
+        // Function to start eye tracking
+        function startEyeTracking() {
+            eyeTrackingStarted = true;
+            socket = io.connect('http://' + document.domain + ':' + location.port);
+            socket.emit('start_eye_tracking');
+
+            // General Timer
+            setInterval(function () {
+                if (eyeTrackingStarted) {
+                    generalTimer--;
+
+                    if (generalTimer <= 0 && !isGreenSquareSet) {
+                        var maxTimeSquare = getMaxTimeSquare();
+                        document.getElementById(maxTimeSquare).classList.add('green');
+                        isGreenSquareSet = true;
+                        resetSquareTimers();
+                    }
+                }
+            }, 1000);
+
+            // Individual Square Timers
+            socket.on('update_gaze_data', function (data) {
+                if (eyeTrackingStarted) {
+                    var gazeCircle = document.getElementById('gazeCircle');
+                    var x = data['left_gaze_point'][0];
+                    var y = data['left_gaze_point'][1];
+
+                    gazeCircle.style.left = (x * window.innerWidth) + 'px';
+                    gazeCircle.style.top = (y * window.innerHeight) + 'px';
+
+                    checkSquareTouch(gazeCircle.getBoundingClientRect(), 'square1');
+                    checkSquareTouch(gazeCircle.getBoundingClientRect(), 'square2');
+                    checkSquareTouch(gazeCircle.getBoundingClientRect(), 'square3');
+                    checkSquareTouch(gazeCircle.getBoundingClientRect(), 'square4');
+                }
+            });
+        }
+
+        function checkSquareTouch(gazeRect, squareId) {
+            var square = document.getElementById(squareId);
+            var squareRect = square.getBoundingClientRect();
+
+            if (
+                gazeRect.left < squareRect.right &&
+                gazeRect.right > squareRect.left &&
+                gazeRect.top < squareRect.bottom &&
+                gazeRect.bottom > squareRect.top
+            ) {
+                squareTimers[squareId].current++;
+                squareTimers[squareId].total++;
+            } else {
+                squareTimers[squareId].current = 0;
+            }
+        }
+
+        function getMaxTimeSquare() {
+            var maxSquare = 'square1';
+            var maxTime = squareTimers['square1'].total;
+
+            for (var square in squareTimers) {
+                if (squareTimers[square].total > maxTime) {
+                    maxSquare = square;
+                    maxTime = squareTimers[square].total;
+                }
+            }
+
+            return maxSquare;
+        }
+
+        function resetSquareTimers() {
+            for (var square in squareTimers) {
+                squareTimers[square] = 0;
+            }
+        }
+    </script>
+</body>
+
+</html>
