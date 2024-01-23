@@ -28,6 +28,7 @@
         justify-content: space-around;
         margin: 20px;
         flex-wrap: wrap;
+        opacity: 0%;
     }
 
     img {
@@ -70,23 +71,31 @@
         }
 
         .squares-container {
+            position: absolute;
             display: flex;
-            justify-content: space-evenly;
-            align-items: center;
-            height: 100vh;
+            justify-content: space-around;
+            margin: 20px;
+            flex-wrap: wrap;
+            top: 13%;
+            margin-left: 8%;
         }
 
         /* Style for the blue squares */
         .blueSquare {
-            width: 400px;
-            height: 400px;
+            width: 350px; /* Match the width of the images */
+            height: 350px; /* Match the height of the images */
             background-color: blue;
+            margin: 10px; /* Match the margin of the images */
         }
 
         /* Additional styling for the green square */
         .blueSquare.green {
             background-color: green;
         }
+
+        .blueSquare.transparentSquare {
+        opacity: 0%;
+    }
     </style>
 </head>
 
@@ -103,8 +112,8 @@
 
 <body>
 
-    <div id="gazeCircle"
-        style="position: absolute; width: 20px; height: 20px; border-radius: 50%; background-color: red;"></div>
+    <div id="gazeCircle" style="position: absolute; width: 20px; height: 20px; border-radius: 50%; background-color: red; z-index: 999;"></div>
+
 
     <div id="imageContainer"></div>
 
@@ -113,13 +122,15 @@
         <img id="reloadImage" src="ComfyUI_windows_portable\ComfyUI\output\amut_00001_.png">
     </div>
 
-    <!-- Blue Squares -->
-    <div class="squares-container">
-        <div class="blueSquare" id="square1"></div>
-        <div class="blueSquare" id="square2"></div>
-        <div class="blueSquare" id="square3"></div>
-        <div class="blueSquare" id="square4"></div>
-    </div>
+        <!-- Blue Squares -->
+        <div class="squares-container">
+            <div class="blueSquare" id="square1"></div>
+            <div class="blueSquare" id="square2"></div>
+            <div class="blueSquare" id="square3"></div>
+            <div class="blueSquare" id="square4"></div>
+        </div>
+    
+
 
     <script>
         let index = 0;  // Initialize the index variable
@@ -209,29 +220,34 @@
     }
 
     function displayImages() {
-        const container = document.getElementById('imageContainer');
-        container.innerHTML = '';
+    const container = document.getElementById('imageContainer');
+    const squares = document.querySelectorAll('.blueSquare');
 
-        const selectedImages = getRandomImages(allImages, 4);
+    const selectedImages = getRandomImages(allImages, 4);
 
-        selectedImages.forEach(image => {
-            const imgElement = document.createElement('img');
-            imgElement.src = image.url;
-            imgElement.alt = `Image ${image.id}`;
-            imgElement.title = image.text;
-            imgElement.addEventListener('click', () => {
-                deleteFiles();
-                const fullPrompt = prefix + ', ' + image.text;
-                displayTextAndRunPython(fullPrompt);
+    selectedImages.forEach((image, index) => {
+        const imgElement = document.createElement('img');
+        imgElement.src = image.url;
+        imgElement.alt = `Image ${image.id}`;
+        imgElement.title = image.text;
 
-                // Display the newest image after 2 seconds
-                setTimeout(() => {
-                    displayNewestImage();
-                }, 2000);
-            });
-            container.appendChild(imgElement);
+        // Set the background image of the corresponding square
+        squares[index].style.backgroundImage = `url('${image.url}')`;
+        squares[index].style.backgroundSize = 'cover'; // Adjust this based on your preference
+
+        imgElement.addEventListener('click', () => {
+            deleteFiles();
+            const fullPrompt = prefix + ', ' + image.text;
+            displayTextAndRunPython(fullPrompt);
+
+            // Display the newest image after 2 seconds
+            setTimeout(() => {
+                displayNewestImage();
+            }, 2000);
         });
-    }
+        container.appendChild(imgElement);
+    });
+}
 
     function toggleDisplay() {
         start();
@@ -349,17 +365,24 @@
 
             for (var square in squareTimers) {
                 if (squareTimers[square].total > maxTime) {
+                    // Remove the transparentSquare class from the previous max square
+                    document.getElementById(maxSquare).classList.remove('transparentSquare');
+                    
                     maxSquare = square;
                     maxTime = squareTimers[square].total;
                 }
             }
+
+            // Add the transparentSquare class to the new max square
+            document.getElementById(maxSquare).classList.add('transparentSquare');
 
             return maxSquare;
         }
 
         function resetSquareTimers() {
             for (var square in squareTimers) {
-                squareTimers[square] = 0;
+                squareTimers[square].current = 0;
+                squareTimers[square].total = 0;
             }
         }
     </script>
