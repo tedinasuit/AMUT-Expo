@@ -14,7 +14,7 @@
     background-color: #f4f4f4;
     margin: 0;
     padding: 0;
-     }
+    }
 
     header {
         background-color: #333;
@@ -219,35 +219,59 @@
         prefix = prefixInput.value || "Porsche poster,"; // Use the entered value or default if empty
     }
 
+    
+    // Existing code...
+
     function displayImages() {
-    const container = document.getElementById('imageContainer');
-    const squares = document.querySelectorAll('.blueSquare');
+        const container = document.getElementById('imageContainer');
+        const squares = document.querySelectorAll('.blueSquare');
 
-    const selectedImages = getRandomImages(allImages, 4);
+        const selectedImages = getRandomImages(allImages, 4);
 
-    selectedImages.forEach((image, index) => {
-        const imgElement = document.createElement('img');
-        imgElement.src = image.url;
-        imgElement.alt = `Image ${image.id}`;
-        imgElement.title = image.text;
+        selectedImages.forEach((image, index) => {
+            const imgElement = document.createElement('img');
+            imgElement.src = image.url;
+            imgElement.alt = `Image ${image.id}`;
+            imgElement.title = image.text;
 
-        // Set the background image of the corresponding square
-        squares[index].style.backgroundImage = `url('${image.url}')`;
-        squares[index].style.backgroundSize = 'cover'; // Adjust this based on your preference
+            // Set the background image of the corresponding square
+            squares[index].style.backgroundImage = `url('${image.url}')`;
+            squares[index].style.backgroundSize = 'cover'; // Adjust this based on your preference
 
-        imgElement.addEventListener('click', () => {
-            deleteFiles();
-            const fullPrompt = prefix + ', ' + image.text;
-            displayTextAndRunPython(fullPrompt);
+            // Store the text in a data attribute of the square element
+            squares[index].setAttribute('data-alt-text', image.text);
 
-            // Display the newest image after 2 seconds
-            setTimeout(() => {
-                displayNewestImage();
-            }, 2000);
+            imgElement.addEventListener('click', () => {
+                deleteFiles();
+                const fullPrompt = prefix + ', ' + image.text;
+                displayTextAndRunPython(fullPrompt);
+
+                // Display the newest image after 2 seconds
+                setTimeout(() => {
+                    displayNewestImage();
+                }, 2000);
+            });
+
+            container.appendChild(imgElement);
         });
-        container.appendChild(imgElement);
+    }
+
+    // Add event listeners to the squares for mouseover and mouseout
+    document.querySelectorAll('.blueSquare').forEach((square) => {
+        square.addEventListener('mouseover', handleSquareMouseover);
+        square.addEventListener('mouseout', handleSquareMouseout);
     });
-}
+
+    function handleSquareMouseover(event) {
+        // Retrieve the text from the data attribute and display it
+        const altText = event.currentTarget.getAttribute('data-alt-text');
+        event.currentTarget.title = altText;
+    }
+
+    function handleSquareMouseout(event) {
+        // Clear the title attribute when the mouse leaves the square
+        event.currentTarget.title = '';
+    }
 
     function toggleDisplay() {
         start();
