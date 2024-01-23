@@ -103,8 +103,6 @@
 
 <body>
 
-    <img src="{{ url_for('static/media', filename='Abandoned carnival ride_00001_.png') }}">
-
     <div id="gazeCircle"
         style="position: absolute; width: 20px; height: 20px; border-radius: 50%; background-color: red;"></div>
 
@@ -138,25 +136,26 @@
         };
 
         const allImages = [
-            { id: 1, url: 'media/Enchanted forest at dusk_00001_.png', text: 'Enchanted forest at dusk' },
-            { id: 2, url: 'media/Galactic cityscape skyline_00001_.png', text: 'Galactic cityscape skyline' },
-            { id: 3, url: 'media/Serene mountain lake_00001_.png', text: 'Serene mountain lake' },
-            { id: 4, url: 'media/Abandoned carnival ride_00001_.png', text: 'Abandoned carnival ride' },
-            { id: 5, url: 'media/Whimsical underwater world_00001_.png', text: 'Whimsical underwater world' },
-            { id: 6, url: 'media/Celestial dance of colors_00001_.png', text: 'Celestial dance of colors' },
-            { id: 7, url: 'media/Desert oasis mirage_00001_.png', text: 'Desert oasis mirage' },
-            { id: 8, url: 'media/Urban jungle at sunrise_00001_.png', text: 'Urban jungle at sunrise' },
-            { id: 9, url: 'media/Steampunk robot invasion_00001_.png', text: 'Steampunk robot invasion' },
-            { id: 10, url: 'media/Mystical moonlit meadow_00001_.png', text: 'Mystical moonlit meadow' },
-            { id: 11, url: 'media/Cyberpunk street market_00001_.png', text: 'Cyberpunk street market' },
-            { id: 12, url: 'media/Floating island paradise_00001_.png', text: 'Floating island paradise' },
-            { id: 13, url: 'media/Ancient ruins in space_00001_.png', text: 'Ancient ruins in space' },
-            { id: 14, url: 'media/Surreal floating architecture_00001_.png', text: 'Surreal floating architecture' },
-            { id: 15, url: 'media/Forgotten spaceship graveyard_00001_.png', text: 'Forgotten spaceship graveyard' },
-            { id: 16, url: 'media/Rainbow waterfall cascade_00001_.png', text: 'Rainbow waterfall cascade' },
-            { id: 17, url: 'media/Haunted Victorian mansion_00001_.png', text: 'Haunted Victorian mansion' },
-            { id: 18, url: 'media/Bioluminescent cave exploration_00001_.png', text: 'Bioluminescent cave exploration' }
+            { id: 1, url: '{{ url_for('serve_image', filename='Enchanted forest at dusk_00001_.png') }}', text: 'Enchanted forest at dusk' },
+            { id: 2, url: '{{ url_for('serve_image', filename='Galactic cityscape skyline_00001_.png') }}', text: 'Galactic cityscape skyline' },
+            { id: 3, url: '{{ url_for('serve_image', filename='Serene mountain lake_00001_.png') }}', text: 'Serene mountain lake' },
+            { id: 4, url: '{{ url_for('serve_image', filename='Abandoned carnival ride_00001_.png') }}', text: 'Abandoned carnival ride' },
+            { id: 5, url: '{{ url_for('serve_image', filename='Whimsical underwater world_00001_.png') }}', text: 'Whimsical underwater world' },
+            { id: 6, url: '{{ url_for('serve_image', filename='Celestial dance of colors_00001_.png') }}', text: 'Celestial dance of colors' },
+            { id: 7, url: '{{ url_for('serve_image', filename='Desert oasis mirage_00001_.png') }}', text: 'Desert oasis mirage' },
+            { id: 8, url: '{{ url_for('serve_image', filename='Urban jungle at sunrise_00001_.png') }}', text: 'Urban jungle at sunrise' },
+            { id: 9, url: '{{ url_for('serve_image', filename='Steampunk robot invasion_00001_.png') }}', text: 'Steampunk robot invasion' },
+            { id: 10, url: '{{ url_for('serve_image', filename='Mystical moonlit meadow_00001_.png') }}', text: 'Mystical moonlit meadow' },
+            { id: 11, url: '{{ url_for('serve_image', filename='Cyberpunk street market_00001_.png') }}', text: 'Cyberpunk street market' },
+            { id: 12, url: '{{ url_for('serve_image', filename='Floating island paradise_00001_.png') }}', text: 'Floating island paradise' },
+            { id: 13, url: '{{ url_for('serve_image', filename='Ancient ruins in space_00001_.png') }}', text: 'Ancient ruins in space' },
+            { id: 14, url: '{{ url_for('serve_image', filename='Surreal floating architecture_00001_.png') }}', text: 'Surreal floating architecture' },
+            { id: 15, url: '{{ url_for('serve_image', filename='Forgotten spaceship graveyard_00001_.png') }}', text: 'Forgotten spaceship graveyard' },
+            { id: 16, url: '{{ url_for('serve_image', filename='Rainbow waterfall cascade_00001_.png') }}', text: 'Rainbow waterfall cascade' },
+            { id: 17, url: '{{ url_for('serve_image', filename='Haunted Victorian mansion_00001_.png') }}', text: 'Haunted Victorian mansion' },
+            { id: 18, url: '{{ url_for('serve_image', filename='Bioluminescent cave exploration_00001_.png') }}', text: 'Bioluminescent cave exploration' }
         ];
+
 
         function reloadImage() {
         var imageElement = document.getElementById('reloadImage');

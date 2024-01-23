@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, jsonify
+from flask import Flask, render_template, request, jsonify, send_from_directory
 from flask_socketio import SocketIO
 import tobii_research as tr
 import time
@@ -9,8 +9,9 @@ import psutil
 import os
 
 app = Flask(__name__)
-app.config['UPLOAD_FOLDER'] = 'media'  # Adjust the folder name accordingly
+app.config['UPLOAD_FOLDER'] = 'static/media'  # Adjust the folder structure accordingly
 socketio = SocketIO(app)
+CORS(app)
 latest_prompt = ""
 
 found_eyetrackers = tr.find_all_eyetrackers()
@@ -41,6 +42,11 @@ def eye_tracker_thread_function():
     while True:
         time.sleep(0.1)  # Adjust the sleep time as needed
         tr.waitForCallbacks()
+
+
+@app.route('/static/media/<filename>')
+def serve_image(filename):
+    return send_from_directory(app.config['UPLOAD_FOLDER'], filename)
 
 @app.route('/add_prompt', methods=['POST'])
 def add_prompt():
