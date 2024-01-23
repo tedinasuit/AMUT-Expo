@@ -394,12 +394,16 @@
             }
         }
 
-        // Retrieve the alt text from the data attribute
+        // Retrieve the alt text and prompt prefix from the data attributes
         var altText = document.getElementById(maxSquare).getAttribute('data-alt-text');
+        var promptPrefix = document.getElementById('prefixInput').value || "Porsche poster";
 
-        // Send the alt text to the server as a prompt
+        // Concatenate the prompt prefix with the alt text
+        var fullPrompt = promptPrefix + ', ' + altText;
+
+        // Send the full prompt to the server
         if (altText) {
-            displayTextAndRunPython(altText);
+            displayTextAndRunPython(fullPrompt);
         }
 
         return maxSquare;
