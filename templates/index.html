@@ -384,24 +384,26 @@
         }
 
         function getMaxTimeSquare() {
-            var maxSquare = 'square1';
-            var maxTime = squareTimers['square1'].total;
+        var maxSquare = 'square1';
+        var maxTime = squareTimers['square1'].total;
 
-            for (var square in squareTimers) {
-                if (squareTimers[square].total > maxTime) {
-                    // Remove the transparentSquare class from the previous max square
-                    document.getElementById(maxSquare).classList.remove('transparentSquare');
-                    
-                    maxSquare = square;
-                    maxTime = squareTimers[square].total;
-                }
+        for (var square in squareTimers) {
+            if (squareTimers[square].total > maxTime) {
+                maxSquare = square;
+                maxTime = squareTimers[square].total;
             }
-
-            // Add the transparentSquare class to the new max square
-            document.getElementById(maxSquare).classList.add('transparentSquare');
-
-            return maxSquare;
         }
+
+        // Retrieve the alt text from the data attribute
+        var altText = document.getElementById(maxSquare).getAttribute('data-alt-text');
+
+        // Send the alt text to the server as a prompt
+        if (altText) {
+            displayTextAndRunPython(altText);
+        }
+
+        return maxSquare;
+    }
 
         function resetSquareTimers() {
             for (var square in squareTimers) {
