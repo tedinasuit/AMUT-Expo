@@ -65,7 +65,7 @@ def run_script():
 @app.route('/delete_files', methods=['POST'])
 def delete_files():
     try:
-        folder_path = "ComfyUI_windows_portable/ComfyUI/output/"
+        folder_path = "static/ComfyUI_windows_portable/ComfyUI/output/"
         # Iterate over files in the folder and delete them
         for filename in os.listdir(folder_path):
             file_path = os.path.join(folder_path, filename)

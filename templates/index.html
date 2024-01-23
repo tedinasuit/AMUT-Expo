@@ -105,7 +105,6 @@
     <button onclick="setPrefix()">Set</button>
     <button id="startButton" onclick="toggleDisplay()">Start</button>
     <button id="resetButton" onclick="reset()" disabled>Reset</button>
-    <button onclick="startEyeTracking()">Start Eye Tracking</button>
 </header>
 
 
@@ -119,7 +118,7 @@
 
     <div id="newestImageContainer">
         <h2>New Iteration by AMUT AI</h2>
-        <img id="reloadImage" src="ComfyUI_windows_portable\ComfyUI\output\amut_00001_.png">
+        <img id="reloadImage" src="{{ url_for('serve_image', filename='amut_00001_.png') }}">
     </div>
 
         <!-- Blue Squares -->
@@ -276,6 +275,7 @@
     function toggleDisplay() {
         start();
         stop();
+        startEyeTracking()
     }
 
     function start() {
@@ -323,8 +323,8 @@
 
     function displayNewestImage() {
         // Construct the URL for the newest image
-        const newestImageURL = `ComfyUI_windows_portable/ComfyUI/output/amut_00001_.png`;  // Assuming PNG format
-        const newestImage = document.getElementById('newestImage');
+        const newestImageURL = `{{ url_for('serve_image', filename='amut_00001_.png') }}`;  // Update filename accordingly
+        const newestImage = document.getElementById('reloadImage');
         newestImage.src = newestImageURL;
     }
 
