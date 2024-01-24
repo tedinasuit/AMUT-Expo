@@ -102,6 +102,11 @@
     <button onclick="setPrefix()">Set</button>
     <button id="startButton" onclick="toggleDisplay()">Start</button>
     <button id="resetButton" onclick="reset()" disabled>Reset everything</button>
+    <button onclick="toggleRedDot()">Toggle Red Dot</button>
+
+    <div id="timerContainer">
+        Timer: <span id="timer">--</span> seconds
+    </div>
 </header>
 
 
@@ -333,7 +338,7 @@
 
             // General Timer
             setInterval(function () {
-                if (eyeTrackingStarted) {
+                if (eyeTrackingStarted && generalTimer > 0) {
                     generalTimer--;
 
                     if (generalTimer <= 0 && !isGreenSquareSet) {
@@ -342,6 +347,9 @@
                         isGreenSquareSet = true;
                         resetSquareTimers();
                     }
+
+                    // Update the timer display
+                    updateTimerDisplay();
                 }
             }, 1000);
 
@@ -412,6 +420,19 @@
                 squareTimers[square].total = 0;
             }
         }
+
+        function updateTimerDisplay() {
+        const timerElement = document.getElementById('timer');
+        timerElement.innerText = generalTimer;
+    }
+
+    function toggleRedDot() {
+        const redDot = document.getElementById('gazeCircle');
+        const currentOpacity = parseFloat(window.getComputedStyle(redDot).getPropertyValue('opacity'));
+
+        // Toggle between 100 and 0 opacity
+        redDot.style.opacity = currentOpacity === 0 ? 1 : 0;
+    }
     </script>
 </body>
 
