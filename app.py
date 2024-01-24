@@ -94,4 +94,3 @@ def handle_start_eye_tracking():
 
 if __name__ == '__main__':
     socketio.run(app)
-
