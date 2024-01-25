@@ -1,2 +1,2 @@
 @echo off
-start python app.py
+start python3.10 app.py

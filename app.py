@@ -17,6 +17,9 @@ latest_prompt = ""
 found_eyetrackers = tr.find_all_eyetrackers()
 my_eyetracker = found_eyetrackers[0]
 
+latest_generated_image = "amut_00001_.png"
+
+
 gaze_data = {'left_gaze_point': (0, 0), 'right_gaze_point': (0, 0)}
 
 def gaze_data_callback(gaze_data_dict):
@@ -57,15 +60,36 @@ def add_prompt():
 
 @app.route('/run_script', methods=['GET'])
 def run_script():
-    global latest_prompt
+    global latest_prompt, latest_generated_image
     # Replace this command with the actual command to run your Python script
     subprocess.run(['python', 'AMUT_workflow_SDXLTurbo.py', latest_prompt])
+    
+    # Update the latest_generated_image variable
+    image_files = [f for f in os.listdir('output') if f.endswith('_0001_')]
+    if image_files:
+        latest_generated_image = image_files[0]
+
     return jsonify(success=True)
+
+
+
+@app.route('/get_latest_generated_image', methods=['GET'])
+def get_latest_generated_image():
+    global latest_generated_image
+    return jsonify(filename=latest_generated_image)
+
+
+@app.route('/get_latest_images', methods=['GET'])
+def get_latest_images():
+    # Retrieve the latest generated images in the 'output' folder
+    image_folder = 'output'
+    image_files = [f for f in os.listdir(image_folder) if f.endswith('_0001_')]
+    return jsonify(images=image_files)
 
 @app.route('/delete_files', methods=['POST'])
 def delete_files():
     try:
-        folder_path = "static/ComfyUI_windows_portable/ComfyUI/output/"
+        folder_path = "static\ComfyUI_windows_portable\ComfyUI\output"
         # Iterate over files in the folder and delete them
         for filename in os.listdir(folder_path):
             file_path = os.path.join(folder_path, filename)

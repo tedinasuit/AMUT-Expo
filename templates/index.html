@@ -8,61 +8,61 @@
     <script src="https://cdn.socket.io/3.0.4/socket.io.js"></script>
     <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
     <style>
-    body {
-    font-family: 'Arial', sans-serif;
-    text-align: center;
-    background-color: #f4f4f4;
-    margin: 0;
-    padding: 0;
-    }
+        body {
+            font-family: 'Arial', sans-serif;
+            text-align: center;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 0;
+        }
 
-    header {
-        background-color: #333;
-        padding: 15px;
-        color: white;
-        font-size: 24px;
-    }
+        header {
+            background-color: #333;
+            padding: 15px;
+            color: white;
+            font-size: 24px;
+        }
 
-    #imageContainer {
-        display: flex;
-        justify-content: space-around;
-        margin: 20px;
-        flex-wrap: wrap;
-        opacity: 0%;
-    }
+        #imageContainer {
+            display: flex;
+            justify-content: space-around;
+            margin: 20px;
+            flex-wrap: wrap;
+            opacity: 0%;
+        }
 
-    img {
-        width: 350px;
-        height: 350px;
-        margin: 10px;
-        cursor: pointer;
-        border-radius: 10px;
-        transition: transform 0.3s ease-in-out;
-    }
+        img {
+            width: 350px;
+            height: 350px;
+            margin: 10px;
+            cursor: pointer;
+            border-radius: 10px;
+            transition: transform 0.3s ease-in-out;
+        }
 
-    img:hover {
-        transform: scale(1.1);
-    }
+        img:hover {
+            transform: scale(1.1);
+        }
 
-    button {
-        padding: 10px;
-        font-size: 16px;
-        margin: 10px;
-        cursor: pointer;
-        border: none;
-        border-radius: 10px;
-        outline: none;
-    }
+        button {
+            padding: 10px;
+            font-size: 16px;
+            margin: 10px;
+            cursor: pointer;
+            border: none;
+            border-radius: 10px;
+            outline: none;
+        }
 
-    #startButton {
-        background-color: dodgerblue;
-        color: white;
-    }
+        #startButton {
+            background-color: dodgerblue;
+            color: white;
+        }
 
-    #resetButton {
-        background-color: indianred;
-        color: white;
-    }
+        #resetButton {
+            background-color: indianred;
+            color: white;
+        }
 
         #header {
             background-color: green;
@@ -73,16 +73,20 @@
         .squares-container {
             display: flex;
             justify-content: space-around;
-            margin: 20px auto 0; /* Center horizontally and place at the top */
+            margin: 20px auto 0;
+            /* Center horizontally and place at the top */
             flex-wrap: wrap;
         }
 
         /* Style for the blue squares */
         .blueSquare {
-            width: 350px; /* Match the width of the images */
-            height: 350px; /* Match the height of the images */
+            width: 350px;
+            /* Match the width of the images */
+            height: 350px;
+            /* Match the height of the images */
             background-color: blue;
-            margin: 10px; /* Match the margin of the images */
+            margin: 10px;
+            /* Match the margin of the images */
         }
 
         /* Additional styling for the green square */
@@ -91,8 +95,8 @@
         }
 
         .blueSquare.transparentSquare {
-        opacity: 0%;
-    }
+            opacity: 0%;
+        }
     </style>
 </head>
 
@@ -113,22 +117,24 @@
 
 <body>
 
-    <div id="gazeCircle" style="position: absolute; width: 20px; height: 20px; border-radius: 50%; background-color: red; z-index: 999;"></div>
-        <!-- Blue Squares -->
-        <div class="squares-container">
-            <div class="blueSquare" id="square1"></div>
-            <div class="blueSquare" id="square2"></div>
-            <div class="blueSquare" id="square3"></div>
-            <div class="blueSquare" id="square4"></div>
-        </div>
+    <div id="gazeCircle"
+        style="position: absolute; width: 20px; height: 20px; border-radius: 50%; opacity: 0%; background-color: red; z-index: 999;">
+    </div>
+    <!-- Blue Squares -->
+    <div class="squares-container">
+        <div class="blueSquare" id="square1"></div>
+        <div class="blueSquare" id="square2"></div>
+        <div class="blueSquare" id="square3"></div>
+        <div class="blueSquare" id="square4"></div>
+    </div>
 
 
     <div id="newestImageContainer">
         <h2>New Iteration by AMUT AI</h2>
         <img id="reloadImage" src="{{ url_for('serve_image', filename='amut_00001_.png') }}">
     </div>
-        <div id="imageContainer"></div>
-    
+    <div id="imageContainer"></div>
+
 
 
     <script>
@@ -168,167 +174,177 @@
 
 
         function reloadImage() {
-        var imageElement = document.getElementById('reloadImage');
-        imageElement.src = "ComfyUI_windows_portable/ComfyUI/output/amut_00001_.png?" + new Date().getTime();
+            // Fetch the latest generated image filename
+            fetch('http://127.0.0.1:5000/get_latest_generated_image')
+                .then(response => response.json())
+                .then(data => {
+                    const imageElement = document.getElementById('reloadImage');
+                    const newImageURL = `static/ComfyUI_windows_portable/ComfyUI/output/${data.filename}`;
+                    imageElement.src = newImageURL + '?' + new Date().getTime();
+                })
+                .catch(error => {
+                    console.error('Error fetching latest generated image:', error);
+                });
 
-        // Call the function again after 1000 milliseconds (1 second)
-        setTimeout(reloadImage, 1000);
-    }
-
-    // Start the initial call to the function
-    reloadImage();
-
-    let intervalId;
-
-    function shuffleArray(array) {
-        for (let i = array.length - 1; i > 0; i--) {
-            const j = Math.floor(Math.random() * (i + 1));
-            [array[i], array[j]] = [array[j], array[i]];
+            // Call the function again after 1000 milliseconds (1 second)
+            setTimeout(reloadImage, 1000);
         }
-    }
 
-    function getRandomImages(allImages, numImages) {
-        const shuffledImages = [...allImages];
-        shuffleArray(shuffledImages);
-        return shuffledImages.slice(0, numImages);
-    }
 
-    function displayTextAndRunPython(text) {
-        // Send the selected text to the server
-        fetch('http://127.0.0.1:5000/add_prompt', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({ prompt: text }),
-        })
-        .then(response => response.json())
-        .then(data => {
-            console.log('Prompt added:', data);
-            // Run the Python script immediately
-            fetch('http://127.0.0.1:5000/run_script');
-        })
-        .catch(error => {
-            console.error('Error:', error);
-        });
-    }
-
-    function setPrefix() {
-        const prefixInput = document.getElementById('prefixInput');
-        prefix = prefixInput.value || "Porsche poster,"; // Use the entered value or default if empty
-    }
-
-    
-    // Existing code...
-
-    function displayImages() {
-        const container = document.getElementById('imageContainer');
-        const squares = document.querySelectorAll('.blueSquare');
-
-        const selectedImages = getRandomImages(allImages, 4);
-
-        selectedImages.forEach((image, index) => {
-            const imgElement = document.createElement('img');
-            imgElement.src = image.url;
-            imgElement.alt = `Image ${image.id}`;
-            imgElement.title = image.text;
-
-            // Set the background image of the corresponding square
-            squares[index].style.backgroundImage = `url('${image.url}')`;
-            squares[index].style.backgroundSize = 'cover'; // Adjust this based on your preference
-
-            // Store the text in a data attribute of the square element
-            squares[index].setAttribute('data-alt-text', image.text);
-
-            imgElement.addEventListener('click', () => {
-                deleteFiles();
-                const fullPrompt = prefix + ', ' + image.text;
-                displayTextAndRunPython(fullPrompt);
-
-                // Display the newest image after 2 seconds
-                setTimeout(() => {
-                    displayNewestImage();
-                }, 2000);
-            });
-
-            container.appendChild(imgElement);
-        });
-    }
-
-    // Add event listeners to the squares for mouseover and mouseout
-    document.querySelectorAll('.blueSquare').forEach((square) => {
-        square.addEventListener('mouseover', handleSquareMouseover);
-        square.addEventListener('mouseout', handleSquareMouseout);
-    });
-
-    function handleSquareMouseover(event) {
-        // Retrieve the text from the data attribute and display it
-        const altText = event.currentTarget.getAttribute('data-alt-text');
-        event.currentTarget.title = altText;
-    }
-
-    function handleSquareMouseout(event) {
-        // Clear the title attribute when the mouse leaves the square
-        event.currentTarget.title = '';
-    }
-
-    function toggleDisplay() {
-        start();
-        stop();
-        startEyeTracking()
-    }
-
-    function start() {
-        deleteFiles();
-        displayImages();
-        intervalId = setInterval(displayImages, 5000); // Change the interval as needed (currently set to 5 seconds)
-        document.getElementById('startButton').innerText = 'Stop';
-        document.getElementById('resetButton').disabled = false;
-    }
-
-    function stop() {
-
-        clearInterval(intervalId);
-        intervalId = null;
-        document.getElementById('startButton').innerText = 'Start';
+        // Start the initial call to the function
         reloadImage();
-    }
 
-    function reset() {
-    // Delete files before resetting
-    deleteFiles();
+        let intervalId;
 
-    stop();
-    document.getElementById('imageContainer').innerHTML = '';
-    document.getElementById('resetButton').disabled = true;
-    reloadImage();
+        function shuffleArray(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+        }
 
-    location.reload(true);  // Reload the entire page
-    }
+        function getRandomImages(allImages, numImages) {
+            const shuffledImages = [...allImages];
+            shuffleArray(shuffledImages);
+            return shuffledImages.slice(0, numImages);
+        }
 
-    function deleteFiles() {
-    // Send a request to the server to delete files
-    fetch('http://127.0.0.1:5000/delete_files', {
-        method: 'POST',
-    })
-    .then(response => response.json())
-    .then(data => {
-        console.log('Files deleted:', data);
-        // Reset the index and display the newest image
-        index = 0;
-        displayNewestImage();
-    })
-    .catch(error => {
-        console.error('Error:', error);
-    });
-}
+        function displayTextAndRunPython(text) {
+            // Send the selected text to the server
+            fetch('http://127.0.0.1:5000/add_prompt', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ prompt: text }),
+            })
+                .then(response => response.json())
+                .then(data => {
+                    console.log('Prompt added:', data);
+                    // Run the Python script immediately
+                    fetch('http://127.0.0.1:5000/run_script');
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                });
+        }
 
-    function displayNewestImage() {
-        // Construct the URL for the newest image
-        const newestImageURL = `{{ url_for('serve_image', filename='amut_00001_.png') }}`;  // Update filename accordingly
-        const newestImage = document.getElementById('reloadImage');
-        newestImage.src = newestImageURL;
-    }
+        function setPrefix() {
+            const prefixInput = document.getElementById('prefixInput');
+            prefix = prefixInput.value || "Porsche poster,"; // Use the entered value or default if empty
+        }
+
+
+        // Existing code...
+
+        function displayImages() {
+            const container = document.getElementById('imageContainer');
+            const squares = document.querySelectorAll('.blueSquare');
+
+            const selectedImages = getRandomImages(allImages, 4);
+
+            selectedImages.forEach((image, index) => {
+                const imgElement = document.createElement('img');
+                imgElement.src = image.url;
+                imgElement.alt = `Image ${image.id}`;
+                imgElement.title = image.text;
+
+                // Set the background image of the corresponding square
+                squares[index].style.backgroundImage = `url('${image.url}')`;
+                squares[index].style.backgroundSize = 'cover'; // Adjust this based on your preference
+
+                // Store the text in a data attribute of the square element
+                squares[index].setAttribute('data-alt-text', image.text);
+
+                imgElement.addEventListener('click', () => {
+                    deleteFiles();
+                    const fullPrompt = prefix + ', ' + image.text;
+                    displayTextAndRunPython(fullPrompt);
+
+                    // Display the newest image after 2 seconds
+                    setTimeout(() => {
+                        displayNewestImage();
+                    }, 2000);
+                });
+
+                container.appendChild(imgElement);
+            });
+        }
+
+        // Add event listeners to the squares for mouseover and mouseout
+        document.querySelectorAll('.blueSquare').forEach((square) => {
+            square.addEventListener('mouseover', handleSquareMouseover);
+            square.addEventListener('mouseout', handleSquareMouseout);
+        });
+
+        function handleSquareMouseover(event) {
+            // Retrieve the text from the data attribute and display it
+            const altText = event.currentTarget.getAttribute('data-alt-text');
+            event.currentTarget.title = altText;
+        }
+
+        function handleSquareMouseout(event) {
+            // Clear the title attribute when the mouse leaves the square
+            event.currentTarget.title = '';
+        }
+
+        function toggleDisplay() {
+            start();
+            stop();
+            startEyeTracking()
+        }
+
+        function start() {
+            deleteFiles();
+            displayImages();
+            intervalId = setInterval(displayImages, 5000); // Change the interval as needed (currently set to 5 seconds)
+            document.getElementById('startButton').innerText = 'Stop';
+            document.getElementById('resetButton').disabled = false;
+        }
+
+        function stop() {
+
+            clearInterval(intervalId);
+            intervalId = null;
+            document.getElementById('startButton').innerText = 'Start';
+            reloadImage();
+        }
+
+        function reset() {
+            // Delete files before resetting
+            deleteFiles();
+
+            stop();
+            document.getElementById('imageContainer').innerHTML = '';
+            document.getElementById('resetButton').disabled = true;
+            reloadImage();
+
+            location.reload(true);  // Reload the entire page
+        }
+
+        function deleteFiles() {
+            // Send a request to the server to delete files
+            fetch('http://127.0.0.1:5000/delete_files', {
+                method: 'POST',
+            })
+                .then(response => response.json())
+                .then(data => {
+                    console.log('Files deleted:', data);
+                    // Reset the index and display the newest image
+                    index = 0;
+                    displayNewestImage();
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                });
+        }
+
+        function displayNewestImage() {
+            // Construct the URL for the newest image
+            const newestImageURL = `{{ url_for('serve_image', filename='amut_00001_.png') }}`;  // Update filename accordingly
+            const newestImage = document.getElementById('reloadImage');
+            newestImage.src = newestImageURL;
+        }
 
         // Function to start eye tracking
         function startEyeTracking() {
@@ -389,30 +405,30 @@
         }
 
         function getMaxTimeSquare() {
-        var maxSquare = 'square1';
-        var maxTime = squareTimers['square1'].total;
+            var maxSquare = 'square1';
+            var maxTime = squareTimers['square1'].total;
 
-        for (var square in squareTimers) {
-            if (squareTimers[square].total > maxTime) {
-                maxSquare = square;
-                maxTime = squareTimers[square].total;
+            for (var square in squareTimers) {
+                if (squareTimers[square].total > maxTime) {
+                    maxSquare = square;
+                    maxTime = squareTimers[square].total;
+                }
             }
+
+            // Retrieve the alt text and prompt prefix from the data attributes
+            var altText = document.getElementById(maxSquare).getAttribute('data-alt-text');
+            var promptPrefix = document.getElementById('prefixInput').value || "Porsche poster";
+
+            // Concatenate the prompt prefix with the alt text
+            var fullPrompt = promptPrefix + ', ' + altText;
+
+            // Send the full prompt to the server
+            if (altText) {
+                displayTextAndRunPython(fullPrompt);
+            }
+
+            return maxSquare;
         }
-
-        // Retrieve the alt text and prompt prefix from the data attributes
-        var altText = document.getElementById(maxSquare).getAttribute('data-alt-text');
-        var promptPrefix = document.getElementById('prefixInput').value || "Porsche poster";
-
-        // Concatenate the prompt prefix with the alt text
-        var fullPrompt = promptPrefix + ', ' + altText;
-
-        // Send the full prompt to the server
-        if (altText) {
-            displayTextAndRunPython(fullPrompt);
-        }
-
-        return maxSquare;
-    }
 
         function resetSquareTimers() {
             for (var square in squareTimers) {
@@ -422,17 +438,17 @@
         }
 
         function updateTimerDisplay() {
-        const timerElement = document.getElementById('timer');
-        timerElement.innerText = generalTimer;
-    }
+            const timerElement = document.getElementById('timer');
+            timerElement.innerText = generalTimer;
+        }
 
-    function toggleRedDot() {
-        const redDot = document.getElementById('gazeCircle');
-        const currentOpacity = parseFloat(window.getComputedStyle(redDot).getPropertyValue('opacity'));
+        function toggleRedDot() {
+            const redDot = document.getElementById('gazeCircle');
+            const currentOpacity = parseFloat(window.getComputedStyle(redDot).getPropertyValue('opacity'));
 
-        // Toggle between 100 and 0 opacity
-        redDot.style.opacity = currentOpacity === 0 ? 1 : 0;
-    }
+            // Toggle between 100 and 0 opacity
+            redDot.style.opacity = currentOpacity === 0 ? 1 : 0;
+        }
     </script>
 </body>
 
